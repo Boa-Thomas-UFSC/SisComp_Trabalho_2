@@ -73,17 +73,24 @@ int join_files(char *output_file, char **input_files, int num_input_files) { // 
 
 int main(int argc, char **argv) {
     if (argc < 2) {
-        fprintf(stderr, "Uso: \t%s <arquivo_de_saida> <arquivo1> <arquivo2> ... <arquivoN>\n\t%s -l\n", argv[0], argv[0]);
+        fprintf(stderr, "Uso: \t%s <arquivo_de_saida> <arquivo1> <arquivo2> ... <arquivoN>\n\t%s -l <arquivo_binario>\n", argv[0], argv[0]);
         return 1;
     }
 
-    char *output_file = argv[1];
+    char *first_arg = argv[1];
 
-    if (strcmp(output_file, "-l") == 0) {
-        // Implementar funcionalidade de listagem aqui...
-        return list_files(output_file);
+    if (strcmp(first_arg, "-l") == 0) {
+        // O segundo argumento deve ser o arquivo que você deseja listar
+        if (argc < 3) {
+            fprintf(stderr, "Uso: \t%s -l <arquivo_binario>\n", argv[0]);
+            return 1;
+        }
+        char *input_file = argv[2];
+        list_files(input_file);
+        return 0;
     }
 
+    char *output_file = argv[1];
     char **input_files = &argv[2];
     int num_input_files = argc - 2;
 
@@ -101,3 +108,4 @@ int main(int argc, char **argv) {
     printf("Arquivos juntados com sucesso no arquivo %s\n", output_file);
     return 0;
 }
+
