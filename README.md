@@ -1,7 +1,7 @@
 # Trabalho_2
-##OQ FALTA
+## OQ FALTA
 
-##Pt1
+# Pt1
 
 ✅ Criação do bloco (4K)
 ✅ Separação do primeiro bloco
@@ -9,7 +9,7 @@
 ✅ Merge blocks
 ⁉️Simulador e testar com o simulador
 
-##Pt2
+# Pt2
 ✅ Juntar os arquivos
 ✅ Adicionar headers no arquivo de saida
 ✅ Listar arquivos no arquivo de saida
