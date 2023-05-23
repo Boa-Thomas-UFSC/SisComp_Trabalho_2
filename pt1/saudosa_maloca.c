@@ -1,67 +1,75 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#pragma pack (push, 1)
+#pragma pack (push, 1) // garante que não haverá padding entre os membros da struct
 
-struct mem_block {
-    int is_free; // 1 se o bloco está livre, 0 caso contrário
-    size_t size;   // Tamanho do bloco de memória
-    void* mem_ptr; // Ponteiro para o bloco de memória
-    struct mem_block* next; // Ponteiro para o próximo bloco de memória
+struct mem_block { // estrutura que representa um bloco de memória
+    int is_free; // flag que indica se o bloco está livre ou não
+    size_t size; // tamanho do bloco
+    void* mem_ptr; // ponteiro para o bloco de memória
+    struct mem_block* next; // ponteiro para o próximo bloco de memória
 };
 
-#pragma pack (pop)
+#pragma pack (pop) // restaura o alinhamento padrão
 
-struct mem_block* head = NULL;
+struct mem_block* head = NULL; // ponteiro para o primeiro bloco de memória
 const size_t INITIAL_SIZE = 4096;  // Tamanho inicial da memória (4 kB)
 
-void* smalloc(size_t size) {
-    if (head == NULL) { // Se a lista estiver vazia, alocamos o primeiro bloco
-        void* initial_memory = malloc(INITIAL_SIZE); // Alocamos a memória inicial
-        if (!initial_memory) { // Se não conseguirmos alocar a memória, retornamos NULL
-            return NULL;
+void* smalloc(size_t size) { // size é o tamanho do bloco de memória a ser alocado
+    if (head == NULL) { // se a lista de blocos de memória estiver vazia
+        void* initial_memory = malloc(INITIAL_SIZE); // aloca memória inicial
+        if (!initial_memory) { // se não foi possível alocar memória
+            return NULL; // retorna NULL
         }
-        head = (struct mem_block*)initial_memory; // Definimos o primeiro bloco como o início da memória alocada
-        head->is_free = 1; // Definimos o primeiro bloco como livre
-        head->size = INITIAL_SIZE - sizeof(struct mem_block); // Definimos o tamanho do primeiro bloco
-        head->mem_ptr = (void*)((char*)head + sizeof(struct mem_block)); // Definimos o ponteiro para o primeiro bloco
-        head->next = NULL; // Definimos o próximo bloco como NULL
+        head = (struct mem_block*)initial_memory; // head aponta para o bloco de memória inicial
+        head->is_free = 1; // marca o bloco de memória como livre
+        head->size = INITIAL_SIZE - sizeof(struct mem_block); // define o tamanho do bloco de memória
+        head->mem_ptr = (void*)((char*)head + sizeof(struct mem_block)); // define o ponteiro para o bloco de memória
+        head->next = NULL; // define o ponteiro para o próximo bloco de memória como NULL
     }
 
-    struct mem_block* current = head; // Definimos o bloco atual como o primeiro bloco
-    struct mem_block* prev = NULL; // Definimos o bloco anterior como NULL
+    struct mem_block* current = head; // current é o ponteiro para o bloco de memória atual
 
-    while (current != NULL) { // Percorremos a lista de blocos
-        if (current->is_free && current->size >= size) { // Se o bloco atual estiver livre e tiver tamanho suficiente
-            current->is_free = 0; // Definimos o bloco atual como ocupado
-            if (current->size > size + sizeof(struct mem_block)) { // Se o bloco atual for maior que o tamanho necessário + o tamanho de um bloco
-                struct mem_block* new_block = (struct mem_block*)((char*)current->mem_ptr + size); // Criamos um novo bloco
-                new_block->is_free = 1; // Definimos o novo bloco como livre
-                new_block->size = current->size - size - sizeof(struct mem_block); // Definimos o tamanho do novo bloco
-                new_block->mem_ptr = (void*)((char*)new_block + sizeof(struct mem_block)); // Definimos o ponteiro para o novo bloco
-                new_block->next = current->next; // Definimos o próximo bloco do novo bloco como o próximo bloco do bloco atual
-                current->next = new_block; // Definimos o próximo bloco do bloco atual como o novo bloco
-                current->size = size; // Definimos o tamanho do bloco atual como o tamanho necessário
+    while (current != NULL) { // percorre a lista de blocos de memória
+        if (current->is_free && current->size >= size) { // encontrou um bloco de memória livre com tamanho suficiente
+            current->is_free = 0; // marca o bloco de memória como ocupado
+            if (current->size > size + sizeof(struct mem_block)) { // se o bloco de memória for maior que o necessário
+                struct mem_block* new_block = (struct mem_block*)((char*)current->mem_ptr + size); // cria um novo bloco de memória
+                new_block->is_free = 1; // marca o novo bloco de memória como livre
+                new_block->size = current->size - size - sizeof(struct mem_block); // define o tamanho do novo bloco de memória
+                new_block->mem_ptr = (void*)((char*)new_block + sizeof(struct mem_block)); // define o ponteiro para o novo bloco de memória
+                new_block->next = current->next; // define o ponteiro para o próximo bloco de memória
+                current->next = new_block; // atualiza o ponteiro para o próximo bloco de memória
+                current->size = size; // atualiza o tamanho do bloco de memória
             }
-            return current->mem_ptr; // Retornamos o ponteiro para o bloco atual
+            return current->mem_ptr; // retorna o ponteiro para o bloco de memória
         }
-        prev = current; // Definimos o bloco anterior como o bloco atual
-        current = current->next; // Definimos o bloco atual como o próximo bloco
+        current = current->next; // atualiza o ponteiro para o bloco atual
     }
 
-    // Se chegarmos aqui, não encontramos um bloco de memória livre grande o suficiente
-    // Portanto, retornamos NULL
     return NULL;
 }
 
-void sfree(void* ptr) { // Libera o bloco de memória apontado por ptr
-    struct mem_block* current = head; // Definimos o bloco atual como o primeiro bloco
+void sfree(void* ptr) { // ptr é o ponteiro retornado por smalloc
+    struct mem_block* current = head; // current é o ponteiro para o bloco de memória que contém ptr
+    struct mem_block* prev = NULL; // prev é o ponteiro para o bloco de memória anterior a current
 
-    while (current != NULL) { // Percorremos a lista de blocos
-        if (current->mem_ptr == ptr) { // Se o bloco atual for o bloco que queremos liberar
-            current->is_free = 1; // Definimos o bloco atual como livre
-            return; // Retornamos
+    while (current != NULL) { // percorre a lista de blocos de memória
+        if (current->mem_ptr == ptr) { // encontrou o bloco de memória que contém ptr
+            current->is_free = 1; // marca o bloco de memória como livre
+            // coalesce free blocks (merge adjacent free blocks)
+            if (prev && prev->is_free) { // bloco anterior está livre
+                prev->size += sizeof(struct mem_block) + current->size; // junta os blocos
+                prev->next = current->next; // atualiza o ponteiro para o próximo bloco
+                current = prev; // atualiza o ponteiro para o bloco atual
+            }
+            if (current->next && current->next->is_free) { // próximo bloco está livre
+                current->size += sizeof(struct mem_block) + current->next->size; // junta os blocos
+                current->next = current->next->next; // atualiza o ponteiro para o próximo bloco
+            }
+            return; // retorna
         }
-        current = current->next; // Definimos o bloco atual como o próximo bloco
+        prev = current; // atualiza o ponteiro para o bloco anterior
+        current = current->next; // atualiza o ponteiro para o bloco atual
     }
 }
