@@ -3,15 +3,17 @@
 
 # Pt1
 
-✅ Criação do bloco (4K)
-✅ Separação do primeiro bloco
-✅ Liberar bloco
-✅ Merge blocks
-⁉️Simulador e testar com o simulador
+- [x] Criação do bloco (4K)
+- [x] Separação do primeiro bloco
+- [x] Liberar bloco
+- [x] Merge blocks
+- [ ] Simulador e testar com o simulador
+> Tá de boa
 
 # Pt2
-✅ Juntar os arquivos
-✅ Adicionar headers no arquivo de saida
-✅ Listar arquivos no arquivo de saida
-⁉️Falta implementação do "Descompactador" (Moratteli ainda n postou)
-⁉️Testar
+- [x] Juntar os arquivos
+- [x] Adicionar headers no arquivo de saida
+- [x] Listar arquivos no arquivo de saida
+- [ ] Falta implementação do "Descompactador" (Moratteli ainda n postou)
+- [ ] Testar
+> Tá de boa
