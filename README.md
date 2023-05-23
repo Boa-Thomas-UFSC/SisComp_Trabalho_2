@@ -15,5 +15,6 @@
 - [x] Adicionar headers no arquivo de saida
 - [x] Listar arquivos no arquivo de saida
 - [ ] Falta implementação do "Descompactador" (Moratteli ainda n postou)
-- [ ] Testar
+- [x] Testar juntar arquivos, add headers e listar arquivos
+- [ ] Testar "Descompactação"
 > Tá de boa
