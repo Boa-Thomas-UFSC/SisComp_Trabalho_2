@@ -71,6 +71,45 @@ int join_files(char *output_file, char **input_files, int num_input_files) { // 
     return 0; // Retorna 0 para indicar que não houve erros
 }
 
+int extract_files(char *input_file) { // Função para extrair arquivos de um arquivo de saída
+    struct fileheader header; // Cabeçalho de um arquivo
+    FILE *in_fp = fopen(input_file, "rb"); // Abre o arquivo de entrada
+    if (in_fp == NULL) { // Verifica se o arquivo foi aberto com sucesso
+        fprintf(stderr, "Não foi possível abrir o arquivo de entrada\n"); // Imprime uma mensagem de erro
+        return 1; 
+    }
+
+    while (fread(&header, sizeof(header), 1, in_fp) == 1) { // Lê o cabeçalho de um arquivo
+        FILE *out_fp = fopen(header.name, "wb"); // Abre o arquivo de saída
+        if (out_fp == NULL) { // Verifica se o arquivo foi aberto com sucesso
+            fprintf(stderr, "Não foi possível abrir o arquivo de saída %s\n", header.name);
+            return 1;
+        }
+
+        char *buffer = malloc(header.filesize); // Aloca memória para o arquivo
+        if (buffer == NULL) { // Verifica se a memória foi alocada com sucesso
+            fprintf(stderr, "Não foi possível alocar memória para o arquivo %s\n", header.name);
+            return 1;
+        }
+
+        if (fread(buffer, 1, header.filesize, in_fp) != header.filesize) { // Lê o conteúdo do arquivo
+            fprintf(stderr, "Falha ao ler o arquivo %s\n", header.name); // Imprime uma mensagem de erro
+            return 1;
+        }
+
+        fwrite(buffer, 1, header.filesize, out_fp); // Escreve o conteúdo do arquivo no arquivo de saída
+        fclose(out_fp); // Fecha o arquivo de saída
+        free(buffer); // Libera a memória alocada para o arquivo
+
+        printf("Arquivo %s extraído com sucesso\n", header.name);
+    }
+
+    fclose(in_fp);
+    return 0;
+}
+
+
+
 int main(int argc, char **argv) {
     if (argc < 2) {
         fprintf(stderr, "Uso: \t%s <arquivo_de_saida> <arquivo1> <arquivo2> ... <arquivoN>\n\t%s -l <arquivo_binario>\n", argv[0], argv[0]);
@@ -78,6 +117,8 @@ int main(int argc, char **argv) {
     }
 
     char *first_arg = argv[1];
+
+//LISTAR ARQUIVOS
 
     if (strcmp(first_arg, "-l") == 0) {
         // O segundo argumento deve ser o arquivo que você deseja listar
@@ -90,6 +131,19 @@ int main(int argc, char **argv) {
         return 0;
     }
 
+//EXTRAIR ARQUIVOS
+
+    if (strcmp(first_arg, "-e") == 0) {
+        // O segundo argumento deve ser o arquivo que você deseja extrair
+        if (argc < 3) {
+            fprintf(stderr, "Uso: \t%s -e <arquivo_binario>\n", argv[0]);
+            return 1;
+        }
+        char *input_file = argv[2];
+        extract_files(input_file);
+        return 0;
+    }
+
     char *output_file = argv[1];
     char **input_files = &argv[2];
     int num_input_files = argc - 2;
@@ -98,6 +152,8 @@ int main(int argc, char **argv) {
     for(int i=0; i < num_input_files; i++) {
         printf("Arquivo de entrada %d: %s\n", i, input_files[i]);
     }
+
+//
 
     // Junta todos os arquivos de entrada no arquivo de saída
     if (join_files(output_file, input_files, num_input_files) != 0) {
