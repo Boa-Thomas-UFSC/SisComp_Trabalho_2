@@ -5,10 +5,12 @@
 #define MAXNAME 256 // Tamanho máximo do nome do arquivo
 
 #pragma pack ( push , 1 ) // Força o compilador a não adicionar bytes de padding
+
 struct fileheader { // Cabeçalho de um arquivo
     char name[MAXNAME]; // Nome do arquivo
     unsigned int filesize; // Tamanho do arquivo
 };
+
 #pragma pack ( pop ) // Volta as configurações de padding para o padrão
 
 int list_files(char *input_file) { // Função para listar os arquivos dentro de um arquivo de saída
@@ -111,57 +113,63 @@ int extract_files(char *input_file) { // Função para extrair arquivos de um ar
 
 
 int main(int argc, char **argv) {
+    // Verifique se temos os argumentos mínimos necessários
     if (argc < 2) {
-        fprintf(stderr, "Uso: \t%s <arquivo_de_saida> <arquivo1> <arquivo2> ... <arquivoN>\n\t%s -l <arquivo_binario>\n", argv[0], argv[0]);
+        printf("Uso:\n");
+        printf("\t%s -c <arquivo_de_saida> <arquivo1> <arquivo2> ... <arquivoN> - Cria arquivo.\n", argv[0]);
+        printf("\t%s -l - Lista arquivos.\n", argv[0]);
+        printf("\t%s -e <arquivo> - Extrai conteúdo.\n", argv[0]);
         return 1;
     }
 
-    char *first_arg = argv[1];
+    // O primeiro argumento é o arquivo de saída ou opção de listagem -l
+    char *opt = argv[1];
 
-//LISTAR ARQUIVOS
-
-    if (strcmp(first_arg, "-l") == 0) {
-        // O segundo argumento deve ser o arquivo que você deseja listar
-        if (argc < 3) {
-            fprintf(stderr, "Uso: \t%s -l <arquivo_binario>\n", argv[0]);
+    if (strcmp(opt, "-l") == 0) {
+        // Listar todos os arquivos e tamanhos no arquivamento
+        char *input_file = argv[2];
+        if(list_files(input_file) != 0){
+            fprintf(stderr, "ERROR list_files\n");
             return 1;
         }
-        char *input_file = argv[2];
-        list_files(input_file);
         return 0;
     }
 
-//EXTRAIR ARQUIVOS
+    // Criar arquivo. 
+    if (strcmp(opt, "-c") == 0){
+        char *output_file = argv[2];
+        char **input_files = &argv[3];
+        int num_input_files = argc - 3;
 
-    if (strcmp(first_arg, "-e") == 0) {
-        // O segundo argumento deve ser o arquivo que você deseja extrair
-        if (argc < 3) {
-            fprintf(stderr, "Uso: \t%s -e <arquivo_binario>\n", argv[0]);
+        printf("Arquivo de saída: %s\n", output_file);
+        for(int i=0; i < num_input_files; i++) {
+            printf("Arquivo de entrada %d: %s\n", i, input_files[i]);
+        }
+
+        // Join all the input files into the output file
+        if (join_files(output_file, input_files, num_input_files) != 0) {
+            fprintf(stderr, "ERROR join_files\n");
             return 1;
         }
-        char *input_file = argv[2];
-        extract_files(input_file);
+
+        printf("Files joined successfully in the file %s\n", output_file);
         return 0;
     }
 
-    char *output_file = argv[1];
-    char **input_files = &argv[2];
-    int num_input_files = argc - 2;
+    // Extrair arquivo. 
+    if (strcmp(opt, "-e") == 0){
+        char *input_file = argv[2];
+        printf("Arquivo para extrair: %s\n", input_file);
 
-    printf("Arquivo de saída: %s\n", output_file);
-    for(int i=0; i < num_input_files; i++) {
-        printf("Arquivo de entrada %d: %s\n", i, input_files[i]);
+        if (extract_files(input_file) != 0) {
+            fprintf(stderr, "ERROR extract_files\n");
+            return 1;
+        }
+
+        printf("Files extracted successfully from the file %s\n", input_file);
+        return 0;
     }
 
-//
-
-    // Junta todos os arquivos de entrada no arquivo de saída
-    if (join_files(output_file, input_files, num_input_files) != 0) {
-        fprintf(stderr, "Falha ao juntar os arquivos\n");
-        return 1;
-    }
-
-    printf("Arquivos juntados com sucesso no arquivo %s\n", output_file);
     return 0;
 }
 
