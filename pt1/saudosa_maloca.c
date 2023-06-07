@@ -73,3 +73,35 @@ void sfree(void* ptr) { // ptr é o ponteiro retornado por smalloc
         current = current->next; // atualiza o ponteiro para o bloco atual
     }
 }
+
+
+
+void print_mem_block(struct mem_block *m){
+    printf("-----------------------------\n");    
+    while(m){
+
+        printf("is_free: %d\n", m->is_free);
+        printf("size: %ld\n", m->size);
+        printf("mem_ptr: %p\n", m->mem_ptr);
+        printf("next: %p\n", m->next);
+        printf("-----------------------------\n");
+        m = m->next;
+    }
+};
+
+
+int main(){
+    /* Exemplo de uso do smalloc(), sfree() e print_mem_block() */
+    char *p1 = (char*) smalloc(200);
+    char *p2 = (char*) smalloc(100);
+    char *p3 = (char*) smalloc(300);
+
+    print_mem_block(head);        
+
+    sfree(p3);
+    sfree(p2);
+
+    print_mem_block(head);            
+
+    return 0;
+}
