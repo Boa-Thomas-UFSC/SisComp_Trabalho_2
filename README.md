@@ -7,7 +7,7 @@
 - [x] Separação do primeiro bloco
 - [x] Liberar bloco
 - [x] Merge blocks
-- [ ] Simulador e testar com o simulador
+- [x] Simulador e testar com o simulador
 > Tá de boa
 
 # Pt2
