@@ -81,6 +81,7 @@ void print_mem_block(struct mem_block *m){
     while(m){
 
         printf("is_free: %d\n", m->is_free);
+        printf("header_size: %ld\n", sizeof(struct mem_block));
         printf("size: %ld\n", m->size);
         printf("mem_ptr: %p\n", m->mem_ptr);
         printf("next: %p\n", m->next);
@@ -101,6 +102,7 @@ int main(){
     sfree(p3);
     sfree(p2);
 
+    printf("After free\n"); // p2 e p3 foram liberados
     print_mem_block(head);            
 
     return 0;
